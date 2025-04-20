@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="trustwallet" content="enable">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>کیف پول ارزی پیشرفته</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.1/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary: #3375d6;
+            --secondary: #2bb8e6;
+            --success: #28a745;
+            --danger: #dc3545;
+            --dark: #343a40;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Vazir', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        }
+        
+        .wallet-section {
+            background: rgba(51, 117, 214, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(51, 117, 214, 0.2);
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2a64c0;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .balance-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .currency-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .balance-amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--dark);
+        }
+        
+        .balance-value {
+            font-size: 1.2rem;
+            color: var(--success);
+        }
+        
+        .transaction-section {
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .transaction-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: var(--primary); margin-bottom: 30px;">
+            <i class="fas fa-wallet"></i> کیف پول ارزی پیشرفته
+        </h1>
+        
+        <div class="wallet-section">
+            <h2><i class="fas fa-plug"></i> اتصال کیف پول</h2>
+            <button id="connectWallet" class="btn btn-primary">
+                <i class="fas fa-link"></i> اتصال به Trust Wallet
+            </button>
+            <div id="walletInfo" style="margin-top: 15px; display: none;">
+                <p><strong><i class="fas fa-address-card"></i> آدرس:</strong> <span id="walletAddress"></span></p>
+                <p><strong><i class="fas fa-network-wired"></i> شبکه:</strong> <span id="networkInfo"></span></p>
+            </div>
+        </div>
+        
+        <div class="wallet-section">
+            <h2><i class="fas fa-coins"></i> موجودی‌های شما</h2>
+            <div id="balances" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                <!-- موجودی‌ها اینجا نمایش داده می‌شوند -->
+            </div>
+        </div>
+        
+        <div class="wallet-section">
+            <h2><i class="fas fa-gift"></i> سیستم پاداش</h2>
+            <div style="text-align: center;">
+                <div style="font-size: 1.2rem; margin: 15px 0;">
+                    <i class="fas fa-clock"></i> زمان باقی‌مانده: <span id="countdown">60</span> ثانیه
+                </div>
+                <div style="font-size: 1.4rem; margin: 15px 0; font-weight: bold;">
+                    پاداش بعدی: <span id="nextReward">100</span> دلار
+                </div>
+                <button id="claimReward" class="btn btn-success" disabled>
+                    <i class="fas fa-hand-holding-usd"></i> دریافت پاداش
+                </button>
+            </div>
+        </div>
+        
+        <div class="wallet-section transaction-section">
+            <h2><i class="fas fa-exchange-alt"></i> انتقال وجه</h2>
+            <div class="form-group">
+                <label for="currencySelect">ارز مورد نظر:</label>
+                <select id="currencySelect" class="form-control">
+                    <option value="BTC">بیت‌کوین (BTC)</option>
+                    <option value="ETH">اتریوم (ETH)</option>
+                    <option value="USDT">تتر (USDT)</option>
+                    <option value="BNB">بی‌ان‌بی (BNB)</option>
+                    <option value="TRX">ترون (TRX)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="recipientAddress">آدرس گیرنده:</label>
+                <input type="text" id="recipientAddress" class="form-control" placeholder="مثال: 0x... یا bc1...">
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">مبلغ:</label>
+                <input type="number" id="amount" class="form-control" placeholder="مقدار به ارز انتخابی">
+            </div>
+            
+            <div class="form-group">
+                <label>کارمزد شبکه:</label>
+                <div id="networkFee" style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin-top: 5px;">
+                    پس از انتخاب ارز محاسبه می‌شود
+                </div>
+            </div>
+            
+            <button id="sendTransaction" class="btn btn-primary" style="margin-top: 10px;">
+                <i class="fas fa-paper-plane"></i> ارسال تراکنش
+            </button>
+            
+            <div id="transactionStatus" class="transaction-status"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
